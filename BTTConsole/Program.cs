@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNet.SignalR;
 using Microsoft.Owin.Cors;
+using Nancy.Hosting.Self;
 using Owin;
 using System;
 using System.Data.Entity;
-using System.Web.Http.SelfHost;
-using System.Web.Http;
-using System.Reflection;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Web.Http;
+using System.Web.Http.SelfHost;
 
 namespace BTTConsole
 {
@@ -24,22 +26,55 @@ namespace BTTConsole
 
 
             // Set up server configuration
-            HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(_baseAddress);
-            config.Routes.MapHttpRoute(
-              name: "DefaultApi",
-              routeTemplate: "api/{controller}/{id}",
-              defaults: new { id = RouteParameter.Optional }
-            );
-            // Create server
-            var server = new HttpSelfHostServer(config);
-            // Start listening
-            server.OpenAsync().Wait();
-            Console.WriteLine("ISG, SA - BarcodeToText");
-            Console.WriteLine("Version: " + version);
-            Console.WriteLine("URL: " + _baseAddress);
-            Console.WriteLine("Presione ENTER para salir...");
-            Console.ReadLine();
-            server.CloseAsync().Wait();
+
+            // initialize an instance of NancyHost (found in the Nancy.Hosting.Self package)
+            var host = new NancyHost(_baseAddress);
+
+            try
+            {
+                host.Start(); // start hosting
+            }
+            catch (AutomaticUrlReservationCreationFailureException aux)
+            {
+                Console.WriteLine("Debe ejecutar esta aplicación con permisos administrativos o ejecutar el comando netsh http add urlacl url=http://+:puerto/ user=Everyone");
+                Console.ReadLine();
+                Environment.Exit(0);
+            }
+            while (true) // Loop indefinitely
+            {
+                Console.Clear();
+                Console.WriteLine("ISG, SA - BarcodeToText");
+                Console.WriteLine("Version: " + version);
+                Console.WriteLine("URL: " + _baseAddress);
+
+                string controltext = Console.ReadLine();
+
+                if (controltext == "Exit")
+                {
+                    host.Stop();  // stop hosting
+                    break;
+                }
+            }
+
+            //HttpSelfHostConfiguration config = new HttpSelfHostConfiguration(_baseAddress);
+
+            //config.Routes.MapHttpRoute(
+            //  name: "DefaultApi",
+            //  routeTemplate: "api/{controller}/{id}",
+            //  defaults: new { id = RouteParameter.Optional }
+            //);
+
+            //// Create server
+            //var server = new HttpSelfHostServer(config);
+            //// Start listening
+            //server.OpenAsync().Wait();
+            //Console.WriteLine("ISG, SA - BarcodeToText");
+            //Console.WriteLine("Version: " + version);
+            //Console.WriteLine("URL: " + _baseAddress);
+            //Console.WriteLine("Presione ENTER para salir...");
+
+            //Console.ReadLine();
+            //server.CloseAsync().Wait();
 
 
 
@@ -96,6 +131,8 @@ namespace BTTConsole
         {
             app.UseCors(CorsOptions.AllowAll);
             app.MapSignalR();
+            string staticFilesDir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "UI");
+            app.UseStaticFiles(staticFilesDir);
         }
     }
     public class MyHub : Hub

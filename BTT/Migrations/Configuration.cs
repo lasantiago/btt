@@ -20,8 +20,12 @@ namespace BTT.Migrations
         {
             var items = new List<Item>
             {
-                new Item{ItemId = new Guid("488b56d5-b52f-4d09-bc48-7f4b0743cbac"), ItemCode = "49000001327", ItemName="Sprite- Soft Drink- 12 Oz Can", ItemPrice = 500},
-                new Item{ItemId = Guid.NewGuid(), ItemCode = "051228637677", ItemName="Hatuey Galleta de Soda", ItemPrice = 500},
+                new Item{
+                    //ItemId = new Guid("488b56d5-b52f-4d09-bc48-7f4b0743cbac"), 
+                    ItemCode = "49000001327", ItemName="Sprite- Soft Drink- 12 Oz Can", ItemPrice = 500},
+                new Item{
+                    //ItemId = Guid.NewGuid(), 
+                    ItemCode = "051228637677", ItemName="Hatuey Galleta de Soda", ItemPrice = 500},
             };
 
             // Adds all base users to the context 
